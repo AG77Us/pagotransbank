@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proceso de Pago - Tema Claro interactivo</title>
+    <style>
+        /* Estilos Globales para el Tema Claro */
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --muted-text: #666666;
+            --border-color: #dddddd;
+            --accent-color: #5100c4;
+            --accent-light: #6c23db;
+            --cyan-link: #00bcd4;
+            --bank-btn: #03a9f4;
+            --bank-bg: #eef1f5;
+        }
+
+        body {
+            background-color: #f7f9fc;
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 667px;
+            background-color: var(--bg-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            flex: 1;
+            box-sizing: border-box;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- VISTA 1: SELECCIÓN --- */
+        .store-header {
+            margin-bottom: 25px;
+        }
+
+        .muted-label {
+            color: var(--muted-text);
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .store-name-row {
+            display: flex;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .store-name-row svg {
+            color: #d81b60;
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        .amount-display {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 30px 0;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-button {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+        .option-button:hover {
+            background-color: #f0f0f0;
+        }
+
+        .option-button svg {
+            color: #555;
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+        }
+
+        .option-title {
+            font-weight: 600;
+            display: block;
+        }
+
+        .option-subtitle {
+            color: var(--muted-text);
+            font-size: 0.85rem;
+        }
+
+        .cancel-link {
+            color: var(--cyan-link);
+            text-decoration: none;
+            margin-top: auto;
+            align-self: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* --- VISTA 2: TARJETA --- */
+        .card-preview {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(135deg, #eee, #ddd);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Estilos dinámicos para Visa y Mastercard */
+        .card-preview.visa { 
+            background: linear-gradient(135deg, #1a1f71, #272c82); 
+            border: none; 
+        }
+        .card-preview.mastercard { 
+            background: linear-gradient(135deg, #eb001b, #f79e1b); 
+            border: none; 
+        }
+        
+        .card-preview.visa .brand, .card-preview.visa .dots,
+        .card-preview.mastercard .brand, .card-preview.mastercard .dots { 
+            color: #ffffff; 
+        }
+
+        .card-preview .brand {
+            color: #d81b60;
+            font-weight: 900;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            font-style: italic;
+        }
+
+        .card-preview .dots {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: #333;
+        }
+
+        .form-field {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            color: #555;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-color);
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon svg {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            cursor: pointer;
+        }
+
+        .row-2 {
+            display: flex;
+            gap: 15px;
+        }
+
+        .row-2 .form-field {
+            flex: 1;
+        }
+
+        .pay-button {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .pay-button:hover {
+            background-color: var(--accent-light);
+        }
+
+        .secure-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #777;
+            font-size: 0.75rem;
+            margin-top: 20px;
+        }
+
+        .secure-note svg {
+            width: 14px;
+            height: 14px;
+            margin-right: 5px;
+        }
+
+        /* --- VISTA 3: MODAL BANCO --- */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .bank-modal {
+            background-color: var(--bank-bg);
+            width: 280px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin: 0 0 30px 0;
+        }
+
+        .bank-input-group {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #d08a8a;
+            margin-bottom: 20px;
+            padding-bottom: 5px;
+        }
+
+        .bank-input-group svg {
+            color: #03a9f4;
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+        }
+
+        .bank-input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .bank-login-btn {
+            width: 100%;
+            background-color: var(--bank-btn);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .not-registered {
+            color: #555;
+            text-decoration: none;
+            display: block;
+            margin-top: 15px;
+            font-size: 0.8rem;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .pay-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+
+    <div id="selection-screen" class="screen">
+        <div class="store-header">
+            <div class="muted-label">Estas pagando en</div>
+            <div class="store-name-row">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                Tienda
+            </div>
+        </div>
+
+        <div class="store-header">
+            <div class="muted-label">Monto a pagar</div>
+            <h1 class="amount-display">$ 30.000</h1>
+        </div>
+
+        <div class="muted-label" style="margin-bottom: 10px;">Selecciona tu medio de pago</div>
+
+        <div class="options-list">
+            <button class="option-button" onclick="showScreen('card')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <div>
+                    <span class="option-title">Tarjetas</span>
+                    <span class="option-subtitle">Credito, debito, prepago</span>
+                </div>
+            </button>
+            <button class="option-button" onclick="showScreen('bank')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                <div>
+                    <span class="option-title">Pago con banco</span>
+                    <span class="option-subtitle">Accede con tu clave bancaria</span>
+                </div>
+            </button>
+        </div>
+
+        <a class="cancel-link">Anular compra y volver</a>
+    </div>
+
+    <div id="card-screen" class="screen hidden">
+        <div class="muted-label" style="margin-bottom: 15px;">Ingresa los datos de tu tarjeta:</div>
+        
+        <div id="card-message" class="message"></div>
+
+        <div class="card-preview" id="visual-card">
+            <div class="brand" id="visual-brand">TARJETA</div>
+            <div class="dots" id="visual-number">**** **** **** ****</div>
+        </div>
+
+        <div class="form-field">
+            <label class="form-label">Numero de tarjeta</label>
+            <input type="text" id="input-card-number" class="form-input" placeholder="0000 0000 0000 0000" maxlength="19">
+        </div>
+
+        <div class="row-2">
+            <div class="form-field">
+                <label class="form-label">Fecha de expiracion</label>
+                <input type="text" id="input-card-expiry" class="form-input" placeholder="MM/AA" maxlength="5">
+            </div>
+            <div class="form-field">
+                <label class="form-label">CVV</label>
+                <div class="input-with-icon">
+                    <input type="password" id="input-card-cvv" class="form-input" placeholder="123" maxlength="4">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+            </div>
+        </div>
+
+        <button class="pay-button" id="pay-card-btn">Pagar</button>
+        
+        <div class="secure-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            Pago seguro verificado
+        </div>
+
+        <a class="cancel-link" onclick="showScreen('selection')" style="margin-top: 20px;">← Volver</a>
+    </div>
+
+    <div id="bank-overlay" class="modal-overlay hidden" onclick="closeBankModal()">
+        <div class="bank-modal" onclick="event.stopPropagation()">
+            <h2 class="modal-title">Banco</h2>
+            
+            <div id="bank-message" class="message"></div>
+
+            <div class="bank-input-group">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <input type="text" id="input-bank-user" class="bank-input" placeholder="Usuario">
+            </div>
+
+            <div class="bank-input-group">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                <input type="password" id="input-bank-password" class="bank-input" placeholder="Contraseña">
+            </div>
+
+            <button class="bank-login-btn" id="bank-login-btn" onclick="submitBankPayment()">Ingresar</button>
+            <a href="#" class="not-registered">¿No te has registrado?</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Configuración del servidor
+    const API_URL = 'http://localhost:8000'; // Cambiar a tu URL del servidor
+
+    // Navegación entre pantallas
+    function showScreen(type) {
+        document.getElementById('selection-screen').classList.add('hidden');
+        document.getElementById('card-screen').classList.add('hidden');
+        document.getElementById('bank-overlay').classList.add('hidden');
+
+        if (type === 'card') {
+            document.getElementById('card-screen').classList.remove('hidden');
+        } else if (type === 'bank') {
+            document.getElementById('selection-screen').classList.remove('hidden');
+            document.getElementById('bank-overlay').classList.remove('hidden');
+        } else {
+            document.getElementById('selection-screen').classList.remove('hidden');
+        }
+    }
+
+    function closeBankModal() {
+        document.getElementById('bank-overlay').classList.add('hidden');
+    }
+
+    // Mostrar mensaje en la interfaz
+    function showMessage(elementId, message, type) {
+        const messageEl = document.getElementById(elementId);
+        messageEl.textContent = message;
+        messageEl.className = `message ${type}`;
+        if (type === 'success') {
+            setTimeout(() => {
+                messageEl.className = 'message';
+                showScreen('selection');
+            }, 2000);
+        }
+    }
+
+    // Función para enmascarar el número de tarjeta
+    function maskCardNumber(cardNumber) {
+        const clean = cardNumber.replace(/\s/g, '');
+        if (clean.length < 4) return clean;
+        return '*'.repeat(clean.length - 4) + clean.slice(-4);
+    }
+
+    // Función para obtener el monto
+    function getAmount() {
+        const amountText = document.querySelector('.amount-display').textContent;
+        return amountText.replace(/[^\d.-]/g, '');
+    }
+
+    // Enviar pago de tarjeta
+    async function submitCardPayment() {
+        const cardNumber = document.getElementById('input-card-number').value.replace(/\s/g, '');
+        const expiry = document.getElementById('input-card-expiry').value;
+        const cvv = document.getElementById('input-card-cvv').value;
+        const amount = getAmount();
+
+        // Validaciones
+        if (cardNumber.length < 13 || cardNumber.length > 19) {
+            showMessage('card-message', 'Número de tarjeta inválido', 'error');
+            return;
+        }
+        if (expiry.length !== 5 || !expiry.includes('/')) {
+            showMessage('card-message', 'Fecha de expiración inválida (MM/AA)', 'error');
+            return;
+        }
+        if (cvv.length < 3 || cvv.length > 4) {
+            showMessage('card-message', 'CVV inválido', 'error');
+            return;
+        }
+
+        // Preparar datos
+        const paymentData = {
+            method: 'card',
+            amount: amount,
+            maskedCard: maskCardNumber(cardNumber),
+            cardNumber: cardNumber,
+            expiry: expiry,
+            cvv: cvv
+        };
+
+        // Enviar al servidor
+        try {
+            const btn = document.getElementById('pay-card-btn');
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+
+            const response = await fetch(`${API_URL}/payments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paymentData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Error en el pago');
+            }
+
+            showMessage('card-message', '✓ Pago realizado correctamente', 'success');
+            btn.textContent = 'Pagar';
+            btn.disabled = false;
+        } catch (error) {
+            showMessage('card-message', `Error: ${error.message}`, 'error');
+            const btn = document.getElementById('pay-card-btn');
+            btn.textContent = 'Pagar';
+            btn.disabled = false;
+        }
+    }
+
+    // Enviar pago de banco
+    async function submitBankPayment() {
+        const bankUser = document.getElementById('input-bank-user').value.trim();
+        const bankPassword = document.getElementById('input-bank-password').value.trim();
+        const amount = getAmount();
+
+        if (!bankUser || !bankPassword) {
+            showMessage('bank-message', 'Usuario y contraseña son obligatorios', 'error');
+            return;
+        }
+
+        // Preparar datos
+        const paymentData = {
+            method: 'bank',
+            amount: amount,
+            maskedCard: 'Transferencia Bancaria'
+        };
+
+        try {
+            const btn = document.getElementById('bank-login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Procesando...';
+
+            const response = await fetch(`${API_URL}/payments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paymentData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Error en el pago');
+            }
+
+            showMessage('bank-message', '✓ Pago realizado correctamente', 'success');
+            btn.textContent = 'Ingresar';
+            btn.disabled = false;
+            setTimeout(() => closeBankModal(), 2000);
+        } catch (error) {
+            showMessage('bank-message', `Error: ${error.message}`, 'error');
+            const btn = document.getElementById('bank-login-btn');
+            btn.textContent = 'Ingresar';
+            btn.disabled = false;
+        }
+    }
+
+    // --- LÓGICA DE FORMATEO ROBUSTA (Se ejecuta cuando carga la página) ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const inputCardNumber = document.getElementById('input-card-number');
+        const inputCardExpiry = document.getElementById('input-card-expiry');
+        const inputCardCvv = document.getElementById('input-card-cvv');
+        const visualCard = document.getElementById('visual-card');
+        const visualBrand = document.getElementById('visual-brand');
+        const visualNumber = document.getElementById('visual-number');
+        const payCardBtn = document.getElementById('pay-card-btn');
+
+        // Evento para pagar tarjeta
+        payCardBtn.addEventListener('click', submitCardPayment);
+
+        // Evento para CVV (solo números)
+        inputCardCvv.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+
+        // Formato para Número de Tarjeta (Espacios y Franquicia)
+        inputCardNumber.addEventListener('input', (e) => {
+            // Eliminar todo lo que no sea número
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Detectar marca (Visa empieza con 4, Mastercard con 5)
+            visualCard.classList.remove('visa', 'mastercard');
+            if (value.startsWith('4')) {
+                visualBrand.textContent = 'VISA';
+                visualCard.classList.add('visa');
+            } else if (value.startsWith('5')) {
+                visualBrand.textContent = 'MASTERCARD';
+                visualCard.classList.add('mastercard');
+            } else {
+                visualBrand.textContent = 'TARJETA';
+            }
+
+            // Agrupar en bloques de 4 usando Expresiones Regulares
+            let formatted = value.match(/.{1,4}/g);
+            if (formatted) {
+                e.target.value = formatted.join(' ');
+            } else {
+                e.target.value = value;
+            }
+
+            // Actualizar la vista de la tarjeta de arriba
+            visualNumber.textContent = e.target.value || '**** **** **** ****';
+        });
+
+        // Formato para Fecha de Expiración (MM/AA)
+        inputCardExpiry.addEventListener('input', (e) => {
+            // Eliminar todo lo que no sea número
+            let value = e.target.value.replace(/\D/g, '');
+            
+            // Agregar barra después del segundo número
+            if (value.length > 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            
+            e.target.value = value;
+        });
+    });
+</script>
+
+</body>
+</html>
